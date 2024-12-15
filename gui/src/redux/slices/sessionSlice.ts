@@ -55,6 +55,11 @@ type SessionState = {
   };
 };
 
+interface StreamUpdatePayload {
+  messages: ChatMessage[];
+  providerName: string;
+}
+
 function isCodeToEditEqual(a: CodeToEdit, b: CodeToEdit) {
   if (a.filepath !== b.filepath || a.contents !== b.contents) {
     return false;
@@ -275,19 +280,27 @@ export const sessionSlice = createSlice({
       state.streamAborter.abort();
       state.streamAborter = new AbortController();
     },
-    streamUpdate: (state, action: PayloadAction<ChatMessage[]>) => {
+    streamUpdate: (state, action: PayloadAction<StreamUpdatePayload>) => {
+      console.log(action.payload.providerName)
       if (state.history.length) {
-        for (const message of action.payload) {
+        for (const message of action.payload.messages) {
           const lastMessage = state.history[state.history.length - 1];
-
+          console.log("Last Message")
+          console.log(lastMessage.message.role)
+          console.log(lastMessage.message.content)
           if (
             message.role &&
             (lastMessage.message.role !== message.role ||
               // This is when a tool call comes after assistant text
               (lastMessage.message.content !== "" &&
                 message.role === "assistant" &&
+                message.toolCalls?.length) ||
+              // This is a ollama tool call
+              (action.payload.providerName === "ollama" &&
+                message.role === "assistant" &&
                 message.toolCalls?.length))
           ) {
+            console.log("Create New Message")
             // Create a new message
             const historyItem: ChatHistoryItemWithMessageId = {
               message: {
@@ -309,8 +322,10 @@ export const sessionSlice = createSlice({
               };
             }
 
+            console.log(historyItem)
             state.history.push(historyItem);
           } else {
+            console.log("Add to existing Message")
             // Add to the existing message
             const msg = state.history[state.history.length - 1].message;
             if (message.content) {

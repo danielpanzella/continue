@@ -65,12 +65,15 @@ export const streamSlashCommand = createAsyncThunk<
       for (const item of update) {
         if (typeof item === "string") {
           dispatch(
-            streamUpdate([
+            streamUpdate(
               {
-                role: "assistant",
-                content: item,
-              },
-            ]),
+                messages: [{
+                  role: "assistant",
+                  content: item,
+                }],
+                providerName: defaultModel.provider,
+              }
+            )
           );
         }
       }

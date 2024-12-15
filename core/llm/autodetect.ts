@@ -85,11 +85,26 @@ const MODEL_SUPPORTS_IMAGES: string[] = [
   "llama3.2",
 ];
 
+const MODEL_SUPPORTS_TOOLS: string[] = [
+  "claude-3-5",
+  "claude-3.5",
+  "llama3.1",
+  "llama3.3",
+  "qwen2.5-coder",
+  "qwq",
+];
+
 function modelSupportsTools(modelName: string) {
-  return (
-    modelName.includes("claude") &&
-    (modelName.includes("3-5") || modelName.includes("3.5"))
-  );
+  const lower = modelName.toLowerCase();
+  if (
+    MODEL_SUPPORTS_TOOLS.some(
+      (modelName) => lower.includes(modelName),
+    )
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 function modelSupportsImages(

@@ -1,4 +1,4 @@
-import { ChatMessage, CompletionOptions, LLMOptions } from "../../index.js";
+import { ChatMessage, CompletionOptions, LLMOptions, Tool } from "../../index.js";
 import { renderChatMessage } from "../../util/messageContent.js";
 import { BaseLLM } from "../index.js";
 import { streamResponse } from "../stream.js";
@@ -49,8 +49,7 @@ interface GenerateOptions extends BaseOptions {
 
 interface ChatOptions extends BaseOptions {
   messages: OllamaChatMessage[]; // the messages of the chat, this can be used to keep a chat memory
-  // Not supported yet - tools: tools for the model to use if supported. Requires stream to be set to false
-  // And correspondingly, tool calls in OllamaChatMessage
+  tools: Tool[] | undefined //tools for the model to use if supported
 }
 
 class Ollama extends BaseLLM {
@@ -190,7 +189,7 @@ class Ollama extends BaseLLM {
 
   private _convertMessage(message: ChatMessage) {
     if (message.role === "tool") {
-      return null;
+      return message;
     }
 
     if (typeof message.content === "string") {
@@ -223,6 +222,7 @@ class Ollama extends BaseLLM {
       options: this._getModelFileParams(options),
       keep_alive: options.keepAlive ?? 60 * 30, // 30 minutes
       stream: options.stream,
+      tools: options.tools,
       // format: options.format, // Not currently in base completion options
     };
   }
@@ -310,6 +310,7 @@ class Ollama extends BaseLLM {
     });
 
     let buffer = "";
+    let lastToolUseId: string | undefined;
     for await (const value of streamResponse(response)) {
       // Append the received chunk to the buffer
       buffer += value;
@@ -322,7 +323,20 @@ class Ollama extends BaseLLM {
         if (chunk.trim() !== "") {
           try {
             const j = JSON.parse(chunk);
-            if (j.message?.content) {
+            if (j.message.role === "assistant" && j.message.tool_calls) {
+              yield {
+                role: "assistant",
+                content: "",
+                toolCalls: j.message.tool_calls.map((call: any) => ({
+                  id: "",
+                  type: "function",
+                  function: {
+                    name: call.function.name,
+                    arguments: '',
+                  },
+              })),
+              };
+            } else if (j.message?.content) {
               yield {
                 role: "assistant",
                 content: j.message.content,

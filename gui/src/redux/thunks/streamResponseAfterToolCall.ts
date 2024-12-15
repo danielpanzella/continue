@@ -39,7 +39,7 @@ export const streamResponseAfterToolCall = createAsyncThunk<
           toolCallId,
         };
 
-        dispatch(streamUpdate([newMessage]));
+        dispatch(streamUpdate({ messages: [newMessage], providerName: defaultModel.provider}));
         dispatch(
           addContextItemsAtIndex({
             index: initialHistory.length,
