@@ -1,6 +1,6 @@
 import { AtSymbolIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import { InputModifiers } from "core";
-import { modelSupportsImages, modelSupportsTools } from "core/llm/autodetect";
+import { modelSupportsImages, modelandProviderSupportsTools } from "core/llm/autodetect";
 import { useRef } from "react";
 import styled from "styled-components";
 import {
@@ -93,7 +93,7 @@ function InputToolbar(props: InputToolbarProps) {
   const isEnterDisabled = props.disabled || isEditModeAndNoCodeToEdit;
   const shouldRenderToolsButton =
     defaultModel &&
-    modelSupportsTools(defaultModel.model) &&
+    modelandProviderSupportsTools(defaultModel.model, defaultModel.provider) &&
     !props.toolbarOptions?.hideTools;
 
   const supportsImages =

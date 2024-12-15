@@ -4,7 +4,6 @@ import {
   ChevronUpIcon,
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
-import { modelSupportsTools } from "core/llm/autodetect";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";

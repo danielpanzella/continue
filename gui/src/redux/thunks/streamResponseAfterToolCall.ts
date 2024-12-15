@@ -59,6 +59,7 @@ export const streamResponseAfterToolCall = createAsyncThunk<
         const messages = constructMessages(
           [...updatedHistory],
           defaultModel.model,
+          defaultModel.provider
         );
         unwrapResult(await dispatch(streamNormalInput(messages)));
       }),

@@ -1,7 +1,7 @@
 import { ChatHistoryItem, ChatMessage, MessagePart } from "../index.js";
 import { normalizeToMessageParts } from "../util/messageContent.js";
 
-import { modelSupportsTools } from "./autodetect.js";
+import { modelandProviderSupportsTools } from "./autodetect.js";
 
 const CUSTOM_SYS_MSG_MODEL_FAMILIES = ["sonnet", "gpt-4o", "mistral-large"];
 
@@ -66,11 +66,11 @@ Always follow these guidelines when generating code responses.`;
 const TOOL_USE_RULES = `When using tools, follow the following guidelines:
 - Avoid calling tools unless they are absolutely necessary. For example, if you are asked a simple programming question you do not need web search. As another example, if the user asks you to explain something about code, do not create a new file.`;
 
-function constructSystemPrompt(model: string): string | null {
+function constructSystemPrompt(model: string, provider:string): string | null {
   if (CUSTOM_SYS_MSG_MODEL_FAMILIES.some((family) => model.includes(family))) {
     return SYSTEM_MESSAGE + "\n\n" + TOOL_USE_RULES;
   }
-  if (modelSupportsTools(model)) {
+  if (modelandProviderSupportsTools(model, provider)) {
     return TOOL_USE_RULES;
   }
 
@@ -83,10 +83,11 @@ const CANCELED_TOOL_CALL_MESSAGE =
 export function constructMessages(
   history: ChatHistoryItem[],
   model: string,
+  provider: string,
 ): ChatMessage[] {
   const msgs: ChatMessage[] = [];
 
-  const systemMessage = constructSystemPrompt(model);
+  const systemMessage = constructSystemPrompt(model, provider);
   if (systemMessage) {
     msgs.push({
       role: "system" as const,

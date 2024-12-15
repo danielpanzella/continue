@@ -85,26 +85,29 @@ const MODEL_SUPPORTS_IMAGES: string[] = [
   "llama3.2",
 ];
 
+const PROVIDER_SUPPORTS_TOOLS: string[] = [
+  "anthropic",
+  "ollama",
+];
+
 const MODEL_SUPPORTS_TOOLS: string[] = [
   "claude-3-5",
   "claude-3.5",
-  "llama3.1",
   "llama3.3",
-  "qwen2.5-coder",
+  "llama3.2",
+  "llama3.1",
   "qwq",
+  "qwen2.5-coder"
 ];
 
-function modelSupportsTools(modelName: string) {
-  const lower = modelName.toLowerCase();
-  if (
-    MODEL_SUPPORTS_TOOLS.some(
-      (modelName) => lower.includes(modelName),
-    )
-  ) {
-    return true;
-  }
-
-  return false;
+function modelandProviderSupportsTools(modelName: string, providerName: string) {
+  const modelSupport = MODEL_SUPPORTS_TOOLS.some(
+    (model) => modelName.toLowerCase().includes(model)
+  )
+  const providerSupport = PROVIDER_SUPPORTS_TOOLS.some(
+    (provider) => providerName.toLowerCase().includes(provider)
+  )
+  return modelSupport && providerSupport
 }
 
 function modelSupportsImages(
@@ -375,5 +378,5 @@ export {
   autodetectTemplateType,
   llmCanGenerateInParallel,
   modelSupportsImages,
-  modelSupportsTools,
+  modelandProviderSupportsTools,
 };
