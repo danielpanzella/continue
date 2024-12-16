@@ -281,13 +281,9 @@ export const sessionSlice = createSlice({
       state.streamAborter = new AbortController();
     },
     streamUpdate: (state, action: PayloadAction<StreamUpdatePayload>) => {
-      console.log(action.payload.providerName)
       if (state.history.length) {
         for (const message of action.payload.messages) {
           const lastMessage = state.history[state.history.length - 1];
-          console.log("Last Message")
-          console.log(lastMessage.message.role)
-          console.log(lastMessage.message.content)
           if (
             message.role &&
             (lastMessage.message.role !== message.role ||
@@ -300,7 +296,6 @@ export const sessionSlice = createSlice({
                 message.role === "assistant" &&
                 message.toolCalls?.length))
           ) {
-            console.log("Create New Message")
             // Create a new message
             const historyItem: ChatHistoryItemWithMessageId = {
               message: {
@@ -322,10 +317,8 @@ export const sessionSlice = createSlice({
               };
             }
 
-            console.log(historyItem)
             state.history.push(historyItem);
           } else {
-            console.log("Add to existing Message")
             // Add to the existing message
             const msg = state.history[state.history.length - 1].message;
             if (message.content) {

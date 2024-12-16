@@ -48,7 +48,6 @@ export const streamNormalInput = createAsyncThunk<
 
   // Stream response
   let next = await gen.next();
-  console.log(next)
   while (!next.done) {
     if (!getState().session.isStreaming) {
       dispatch(abortStream());
@@ -56,7 +55,6 @@ export const streamNormalInput = createAsyncThunk<
     }
 
     const updates = next.value as ChatMessage[];
-    console.log(defaultModel)
     dispatch(streamUpdate({ messages: updates, providerName: defaultModel.provider}));
     next = await gen.next();
   }
